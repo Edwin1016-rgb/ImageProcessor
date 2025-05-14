@@ -1,0 +1,67 @@
+services:
+  api:
+    build:
+      context: ./api
+    container_name: image_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/uploaded_images:/app/uploaded_images
+      - ./shared_status:/shared/status
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" 
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+  
+  resize-worker:
+    build:
+      context: ./resize-worker
+    container_name: resize-worker
+    depends_on:
+      - rabbitmq
+    environment:
+      - QUEUE_RESIZE=resize
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./shared_status:/shared/status
+  watermark-worker:
+    build:
+      context: ./watermark-worker
+    container_name: watermark-worker
+    depends_on:
+      - rabbitmq
+    environment:
+      - QUEUE_WATERMARK=watermark
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./shared_status:/shared/status
+  content_detection_worker:
+    build:
+      context: ./content_detection_worker
+    container_name: content_detection_worker
+    depends_on:
+      - rabbitmq
+    environment:
+      - QUEUE_DETECT=detect
+      - RABBITMQ_HOST=rabbitmq
+    volumes:
+      - ./shared_status:/shared/status
+  notification_service:
+    build:
+      context: ./notification_service
+    container_name: notification_service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq

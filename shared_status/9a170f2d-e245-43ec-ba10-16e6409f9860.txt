@@ -1,0 +1,3 @@
+resize:resized
+watermark:watermarked
+detect:shi
