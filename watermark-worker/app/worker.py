@@ -6,7 +6,7 @@ import json
 QUEUE_NAME = os.getenv("QUEUE_WATERMARK", "watermark")
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq")
 
-def connect_to_rabbitmq(host=RABBITMQ_HOST, retries=10, delay=3):
+def connect_to_rabbitmq(host=RABBITMQ_HOST, retries=10, delay=10):
     for attempt in range(retries):
         try:
             return pika.BlockingConnection(pika.ConnectionParameters(host=host))
